@@ -96,35 +96,3 @@
     s
     (recur tail (+ s (if (= head e) 1 0))))
   ))
-
-(defn node [x y]
-  {:left nil :right nil :key x :val y})
-
-(defn search [bt key]
-  (if (not= nil bt)
-      (if (= (:key bt) key)
-          (:val bt)
-          (if (> (:key bt) key)
-              (search (:right bt) key)
-              (search (:left bt) key)
-          )
-      )
-      -1
-  )
-)
-
-(defn insert [bt key]
-  (if (not= bt nil)
-      (if (> key (:key bt))
-          {:left (:left bt) :key (:key bt) :val (:val bt) :right (insert (:right bt) key)}
-          {:left (insert (:left bt) key) :key (:key bt) :val (:val bt) :right (:right bt)}
-      )
-      (node key 1)
-  )
-)
-(defn size [f]
-  (if (nil? f)
-    0
-    (+ 1 (+ (size (:left f)) (size (:right f))))
-  )
-)
