@@ -15,30 +15,24 @@
 
 (defn can-visit? [visited x]  (every? (fn[r] (some #(= % r) visited)) (dep x)))
 
+(defn ord[x]
+  (- (+ 61 (int (first x))) (int \A)))
 
 
-; (defn cmp[visited x y]
-;         (if (< (count (filter (partial can-visit? visited) (dep x))) (count (filter (partial can-visit? visited) (dep y))))
-;            (< (int (first x)) (int (first y))))
-;            (= (count (filter (partial can-visit? visited) (dep x))) (count (filter (partial can-visit? visited) (dep y)))))
+(defn schedule [func] 
+  (apply concat (loop [ pending (partition 2 (interleave no-dep-nodes (map ord no-dep-nodes)))
+          visited (list )
+          res [] ]
+      (let [ [ f & t ] pending
+            [h c & r] f
+            neigbrs  (adj h)
+            next_steps (filter (partial can-visit? (cons h visited))  neigbrs)
+            ]
+          (if (nil? f)
+              res
+              (recur (sort-by func (concat t (map #(list %1 (+ c (ord %1))) next_steps)))
+                    (conj visited h) 
+                    (conj res f)))))))
 
-
-(println (apply concat (loop [ pending no-dep-nodes
-        visited (list )
-        res [] ]
-    
-    (let [ [ h & t ] pending
-           neigbrs  (adj h)
-           next_steps (sort (filter (partial can-visit? (cons h visited))  neigbrs))
-           wsteps (sort-by second (concat (map #(list %1 (int (first %1))) t) (map #(list %1 (+ (- (int (first %1)) 4) (int (first h)))) next_steps)))
-           ; TODO pasar esto como parametro
-           ]
-         (println (or  (nil? h)  (list h (- (int (first h)) 4) wsteps)))
-        (if (nil? h)
-            res
-            (recur (concat t next_steps) (conj visited h) (conj res h))) 
-    )
-)))
-
-; [BTVYIWRSKMAQGXUZHPOCDLJNFE]
-;  BTVYIWRSKMAGQZUXHPOCDLJNFE
+(println (map first (partition 2 (schedule first)))) ;; Lexicographic-order
+(println (first (reverse (schedule second)))) ;; Task-duration
