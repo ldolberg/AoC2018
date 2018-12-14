@@ -4,37 +4,36 @@
     ; (println "e" act)
     [(first act) (second act) (inc (nth act 2))])
 
-(defn parse [ chain res stack]
-    (println (count chain) (+ (reduce + res) (reduce + chain)))
-    ;  (println (count chain) chain stack res)
+(println (loop [ chain (drop 2 input) res (list) stack (list  [ (first input) (second input) 0 ] ) rc (list)]  
+    ; (println (cou)nt chain) chain stack res  ) ;(first chain) (inctop (first stack)) (rest stack) (drop (second chain) (rest (rest chain))))
     (if (not (empty? chain) )
     (let [ [c m & r] chain
            [act & rstack ]  stack 
-           incact (if (empty? stack) (inctop [c m 0]) (inctop act))] 
-            ; (println (count chain) (second act))
-            ; (if (= c 0) (println "( c m [] [" (take m r) "]"))
-            ; (if (not (empty? stack))
-            ;     (if (= (nth act 2) (first act)) (println "reduce" chain (concat res (take (second act) chain)) "."  stack "." act "." (rest rstack) ) ))
-            ; (if (or (empty? stack)
-            ; (if (and (not (empty? stack)) (= (nth act 2) (first act)) (println "reduce" (take (second act) chain )))) 
-            (if (and (= (nth act 2) (count chain))) (println "fin" (reduce + res) (reduce + chain))
-            (if (= c 0)
-                 (parse (drop m r)
-                        (concat res (take m r))
-                        (cons incact rstack))
-                (if (and (= 0 1) (empty? stack))
-                    (parse r res (cons [c m 0] stack))
-                    (if (and (= (first act) (nth act 2)) (empty? chain))
-                        (concat res input)
-                        (if (= (nth act 2) (first act))
-                            (parse (drop (second act) chain)
-                                (concat res (take (second act) chain))
-                                (cons (inctop (first rstack)) (rest rstack)))
-                            (parse r res (cons [ c m 0 ] (cons incact rstack)))
-                        )))
-            ))
+           incact (inctop act)
+           exec_p  (if (= c 0) ; terminal node ; take payload
+                        (list (drop m r)
+                        (conj res (reduce + (take m r)))
+                        (cons incact rstack) rc)
+            (if (and (= (first act) (nth act 2)) (empty? chain)) ; finished the list
+                        (list (list ) (concat res chain) nil rc)
+                        (if (= (nth act 2) (first act)) ; all the child done for this node ; take the payload 
+                            (list (drop (second act) chain)
+                                (concat res (if (> (count (filter #(and (< %1 (first act)) (> %1 0)) (take (second act) chain))) 0) 
+                                                   (take (second act) chain)
+                                                    (map #(* 0 %) (range (second act)))))
+                                (cons (first rstack) (rest rstack))
+                                (concat rc (if (> (count (filter #(and (< %1 (first act)) (> %1 0)) (take (second act) chain))) 0)
+                                            (map #( nth res  %) (filter #(and (< %1 (first act)) (> %1 0)) (take (second act) chain)))
+                                            (list 0)))); 
+                            (list r res (cons [ c m 0 ] (cons incact rstack)) rc) ; a new node starts
+                        )))]
+                        ; (println rc)
+            ; (if (= (nth act 2) (first act)) (println stack (if (> (count (filter #(and (< %1 (first act)) (> %1 0)) (take (second act) chain))) 0)
+            ; (reduce + (map #( nth res  %) (filter #(and (< %1 (first act)) (> %1 0)) (take (second act) chain))))
+            ; 0)))
+            (recur (first exec_p) (second exec_p) (nth exec_p 2) (nth exec_p 3))
+            )
+            (list (reduce + res) (reduce + rc)))))
 
-            (concat res nil))))
-
-; (println  input [] [ (first input) (second input) 0 ])
-(println (parse (drop 2 input) (list ) (list  [ (first input) (second input) 0 ] )))
+;; ; (println  input [] [ (first input) (second input) 0 ])
+;; (println (parse (drop 2 input) (list ) (list  [ (first input) (second input) 0 ] )))
